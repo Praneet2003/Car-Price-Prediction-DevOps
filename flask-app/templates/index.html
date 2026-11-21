@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Used Car Price Prediction</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Used Car Price Prediction</h1>
+
+    <p>Enter your car details to estimate its resale value.</p>
+
+    <form action="/predict" method="POST">
+
+        <!-- Section 1: Car Selection -->
+        <h2 class="section-title">1. Select Your Car</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="brand">Car Brand</label>
+
+                <select name="Brand" id="brand" required>
+                    <option value="">Select Brand</option>
+
+                    {% for brand in brands %}
+                        <option value="{{ brand }}">{{ brand }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="car_model">Car Model / Variant</label>
+
+                <select name="Car_Model" id="car_model" required>
+                    <option value="">Select Car Model</option>
+                </select>
+            </div>
+
+        </div>
+
+
+        <!-- Section 2: Vehicle Details -->
+        <h2 class="section-title">2. Vehicle Details</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="year">Manufacturing Year</label>
+
+                <input type="number"
+                       name="Year"
+                       id="year"
+                       min="1990"
+                       max="2026"
+                       placeholder="e.g. 2018"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="kilometers">Kilometers Driven</label>
+
+                <input type="number"
+                       name="Kilometers_Driven"
+                       id="kilometers"
+                       min="0"
+                       placeholder="e.g. 45000"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+
+                <select name="Location" id="location" required>
+                    <option value="">Select Location</option>
+                    <option>Mumbai</option>
+                    <option>Pune</option>
+                    <option>Chennai</option>
+                    <option>Coimbatore</option>
+                    <option>Hyderabad</option>
+                    <option>Jaipur</option>
+                    <option>Kochi</option>
+                    <option>Kolkata</option>
+                    <option>Delhi</option>
+                    <option>Bangalore</option>
+                    <option>Ahmedabad</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="owner">Owner Type</label>
+
+                <select name="Owner_Type" id="owner" required>
+                    <option value="">Select Owner Type</option>
+                    <option>First</option>
+                    <option>Second</option>
+                    <option>Third</option>
+                    <option>Fourth & Above</option>
+                </select>
+            </div>
+
+        </div>
+
+
+        <!-- Section 3: Automatic Specifications -->
+        <h2 class="section-title">3. Vehicle Specifications</h2>
+
+        <p class="spec-note">
+            These details are automatically filled based on your selected car model.
+        </p>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="fuel_type">Fuel Type</label>
+
+                <input type="text"
+                       name="Fuel_Type"
+                       id="fuel_type"
+                       placeholder="Auto-filled"
+                       readonly
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="transmission">Transmission</label>
+
+                <input type="text"
+                       name="Transmission"
+                       id="transmission"
+                       placeholder="Auto-filled"
+                       readonly
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="mileage">Mileage (kmpl / km/kg)</label>
+
+                <input type="number"
+                       name="Mileage"
+                       id="mileage"
+                       placeholder="Auto-filled"
+                       step="any"
+                       readonly
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="engine">Engine (CC)</label>
+
+                <input type="number"
+                       name="Engine"
+                       id="engine"
+                       placeholder="Auto-filled"
+                       readonly
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="power">Power (bhp)</label>
+
+                <input type="number"
+                       name="Power"
+                       id="power"
+                       placeholder="Auto-filled"
+                       step="any"
+                       readonly
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="seats">Seating Capacity</label>
+
+                <input type="number"
+                       name="Seats"
+                       id="seats"
+                       placeholder="Auto-filled"
+                       readonly
+                       required>
+            </div>
+
+        </div>
+
+
+        <button type="submit">
+            Predict Car Price
+        </button>
+
+    </form>
+
+
+    <!-- Prediction Result -->
+    {% if prediction is defined %}
+
+        <div class="result">
+            Estimated Car Price: ₹{{ prediction }} Lakhs
+        </div>
+
+    {% endif %}
+
+
+    <!-- Error Message -->
+    {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

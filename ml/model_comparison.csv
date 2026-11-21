@@ -1,0 +1,7 @@
+Model,MAE,RMSE,R2 Score,Training Time
+Random Forest,1.481,3.606,0.894,1.26
+Extra Trees,1.456,3.653,0.892,1.42
+Gradient Boosting,1.716,3.691,0.889,0.93
+Decision Tree,2.088,5.121,0.787,0.08
+Ridge Regression,3.142,7.256,0.572,0.06
+Linear Regression,3.156,7.265,0.571,0.13
