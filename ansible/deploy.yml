@@ -1,0 +1,104 @@
+
+---
+- name: Deploy Car Price Prediction Application
+  hosts: webservers
+  become: yes
+
+  tasks:
+
+    # 1. Download application from GitHub
+    - name: Clone project from GitHub
+      ansible.builtin.git:
+        repo: https://github.com/Praneet2003/Car-Price-Prediction-DevOps.git
+        dest: /opt/car-price-prediction
+        version: main
+
+    # 2. Create Python environment
+    - name: Create Python virtual environment
+      ansible.builtin.command:
+        cmd: python3 -m venv /opt/car-price-prediction/venv
+        creates: /opt/car-price-prediction/venv/bin/activate
+
+    # 3. Install project dependencies
+    - name: Install Python dependencies
+      ansible.builtin.pip:
+        requirements: /opt/car-price-prediction/requirements.txt
+        virtualenv: /opt/car-price-prediction/venv
+
+    # 4. Configure Gunicorn
+    - name: Create Gunicorn systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/car-price.service
+        content: |
+          [Unit]
+          Description=Car Price Prediction Flask Application
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          Group=www-data
+          WorkingDirectory=/opt/car-price-prediction/flask-app
+          Environment="PATH=/opt/car-price-prediction/venv/bin"
+          ExecStart=/opt/car-price-prediction/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 app:app
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Enable and start Gunicorn
+      ansible.builtin.systemd:
+        name: car-price
+        enabled: yes
+        state: restarted
+
+    # 5. Install Nginx
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    # 6. Configure Nginx reverse proxy
+    - name: Configure Nginx
+      ansible.builtin.copy:
+        dest: /etc/nginx/sites-available/car-price-prediction
+        content: |
+          server {
+              listen 80;
+              server_name _;
+
+              location / {
+                  proxy_pass http://127.0.0.1:8000;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+              }
+          }
+
+    # 7. Enable our Nginx configuration
+    - name: Enable Nginx site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/car-price-prediction
+        dest: /etc/nginx/sites-enabled/car-price-prediction
+        state: link
+
+    - name: Remove default Nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    # 8. Validate and start Nginx
+    - name: Test Nginx configuration
+      ansible.builtin.command: nginx -t
+      changed_when: false
+
+    - name: Enable and restart Nginx
+      ansible.builtin.systemd:
+        name: nginx
+        enabled: yes
+        state: restarted
+
